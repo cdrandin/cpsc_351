@@ -138,10 +138,23 @@ void mainLoop()
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
-	
-	/* TODO: Deallocate the shared memory chunk */
+    if (shmdt(sharedMemPtr) == -1) { // detach
+        perror("shmdt");
+        exit(1);
+    }
+
+   	/* TODO: Deallocate the shared memory chunk */	
+    if (shmctl(shmid, IPC_RMID, NULL) == -1) { // remove
+    	perror("shmctl");
+    	exit(1);
+    }
 	
 	/* TODO: Deallocate the message queue */
+	if (msgctl(msqid, IPC_RMID, NULL) == -1) {
+		perror("msgctl");
+		exit(1);
+	}
+
 }
 
 /**
@@ -170,6 +183,7 @@ int main(int argc, char** argv)
 	mainLoop();
 
 	/** TODO: Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup) **/
-		
+	cleanUp(shmid, msqid, sharedMemPtr);
+	
 	return 0;
 }
