@@ -76,6 +76,9 @@ void mainLoop()
 {
 	// The size of the mesage
 	int msgSize = 0;
+
+	// Store message received from the sender.
+	message recvMessage;
 	
 	// Open the file for writing
 	FILE* fp = fopen(recvFileName, "w");
@@ -103,13 +106,18 @@ void mainLoop()
      * NOTE: the received file will always be saved into the file called
      * "recvfile"
      */
+	msgSize = msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.text), SENDER_DATA_TYPE, 0);
+	if (msgSize == -1) {
+		perror("msgrcv");
+		exit(-1);
+	}
 
-	/* Keep receiving until the sender set the size to 0, indicating that
- 	 * there is no more data to send
- 	 */	
+
+	// Keep receiving until the sender set the size to 0, indicating that
+ 	// there is no more data to send	
 	while(msgSize != 0)
 	{	
-		/* If the sender is not telling us that we are done, then get to work */
+		// If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
 			// Save the shared memory to file
