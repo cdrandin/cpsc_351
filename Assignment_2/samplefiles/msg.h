@@ -21,7 +21,7 @@ struct message
 	//char mtext[1];
 	
 	// Send message across
-	char text[20];
+	char *text;
 	
 	/**
  	 * Prints the structure
