@@ -11,6 +11,7 @@
 
 /* The ids for the shared memory segment and the message queue */
 int shmid, msqid;
+int errorcheck;
 
 /* The pointer to the shared memory */
 void *sharedMemPtr;
@@ -29,6 +30,12 @@ const char recvFileName[] = "recvfile";
 void init(int& shmid, int& msqid, void*& sharedMemPtr)
 {
 	
+	key_t key = ftok("keyfile.txt", 'a');
+	if (key == -1) {
+        perror("ftok");
+        exit(1);
+    }
+
 	/* TODO: 1. Create a file called keyfile.txt containing string "Hello world" (you may do
  		    so manually or from the code).
 	         2. Use ftok("keyfile.txt", 'a') in order to generate the key.
@@ -40,13 +47,26 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		    may have the same key.
 	 */
 	
-
-	
 	/* TODO: Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE. */
+	// shmid: shared memory ID
+    if ((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) {
+        perror("shmget");
+        exit(1);
+    }
+
 	/* TODO: Attach to the shared memory */
+	sharedMemPtr = shmat(shmid, (void*)0 , 0); // let OS choose address; read and write
+	if(sharedMemPtr == (char*)(-1)){
+		perror("shmat");
+		exit(1);
+	}
+
 	/* TODO: Create a message queue */
+	msqid = msgget(key, IPC_CREAT);
+	if(msqid == -1)
+		perror("msqid");
+
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
-	
 }
  
 
