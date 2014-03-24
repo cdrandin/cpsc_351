@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <cstring>
 #include "msg.h"    // For the message struct
 
 // The size of the shared memory chunk
@@ -125,7 +126,7 @@ void mainLoop()
  			 * does not matter in this case). 
  			 */
 			recvMessage.mtype = RECV_DONE_TYPE;
-			if(msgsnd (msgid, &recvMessage.text, strlen(recvMessage.text)+1, 0) == -1)
+			if(msgsnd (msqid, &recvMessage.text, strlen(recvMessage.text)+1, 0) == -1)
 			{
 	    		perror("Error in send");
 	    		exit(-1);
