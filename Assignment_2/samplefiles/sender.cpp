@@ -132,7 +132,7 @@ void send(const char* fileName)
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		sndMsg.mtype = SENDER_DATA_TYPE;
-
+		sndMsg.text = new char[sndMsg.size];
 		fscanf(fp,"%s", sndMsg.text);
 
 		 /* ditch newline at end, if it exists */
