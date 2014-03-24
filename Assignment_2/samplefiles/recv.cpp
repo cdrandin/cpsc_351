@@ -97,16 +97,17 @@ void mainLoop()
 		exit(1);
 	}
     /* TODO: Receive the message and get the message size. The message will 
-     * contain regular information. The message will be of SENDER_DATA_TYPE
-     * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
-     * of the message is not 0, then we copy that many bytes from the shared
-     * memory region to the file. Otherwise, if 0, then we close the file and
-     * exit.
-     *
-     * NOTE: the received file will always be saved into the file called
-     * "recvfile"
-     */
-	msgSize = msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.text), SENDER_DATA_TYPE, 0);
+   	* contain regular information. The message will be of SENDER_DATA_TYPE
+    * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
+    * of the message is not 0, then we copy that many bytes from the shared
+    * memory region to the file. Otherwise, if 0, then we close the file and
+    * exit.
+    *
+    * NOTE: the received file will always be saved into the file called
+    * "recvfile"
+    */
+    recvMessage.mtype = RECV_DONE_TYPE;
+	msgSize = msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.text), recvMessage.mtype, 0);
 	if (msgSize == -1) {
 		perror("msgrcv");
 		exit(-1);
@@ -130,6 +131,10 @@ void mainLoop()
  			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
  			 * does not matter in this case). 
  			 */
+			cout << "HWLLO" << endl;
+			recvMessage.print(fp);
+			
+			
 		}
 		// We are done
 		else
@@ -182,13 +187,12 @@ void ctrlCSignal(int signal)
 
 int main(int argc, char** argv)
 {
-	signal(SIGINT, ctrlCSignal);
-	
-	/* TODO: Install a singnal handler (see signaldemo.cpp sample file).
+	/* Install a singnal handler (see signaldemo.cpp sample file).
  	 * In a case user presses Ctrl-c your program should delete message
  	 * queues and shared memory before exiting. You may add the cleaning functionality
  	 * in ctrlCSignal().
  	 */
+	signal(SIGINT, ctrlCSignal);
 				
 	// Initialize
 	init(shmid, msqid, sharedMemPtr);
