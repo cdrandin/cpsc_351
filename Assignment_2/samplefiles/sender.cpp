@@ -191,7 +191,7 @@ int main(int argc, char** argv)
 	
 	/* Send the file */
 	send(argv[1]);
-	
+
 	/* Cleanup */
 	cleanUp(shmid, msgid, sharedMemPtr);
 		
