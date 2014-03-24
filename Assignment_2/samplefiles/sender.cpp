@@ -22,8 +22,7 @@ void* sharedMemPtr;
 
 void init(int& shmid, int& msqid, void*& sharedMemPtr)
 {
-	/* TODO: 
-        1. Create a file called keyfile.txt containing string "Hello world" (you may do
+	/*  1. Create a file called keyfile.txt containing string "Hello world" (you may do
  		    so manually or from the code).
 	    2. Use ftok("keyfile.txt", 'a') in order to generate the key.
 		3. Use the key in the TODO's below. Use the same key for the queue
@@ -41,7 +40,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		exit(1);
 	}
 
-	/* TODO: Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
+	/* Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
 	/* connect to (and possibly create) the segment: */
 	if((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) 
 	{
@@ -49,13 +48,13 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		exit(1);
 	}
 
-	/* TODO: Attach to the shared memory */
+	/* Attach to the shared memory */
     /* attach to the segment to get a pointer to it: */
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
 	if(sharedMemPtr == (char *)(-1))
 		perror("shmat");
 	
-	/* TODO: Create a message queue */
+	/* Create a message queue */
 	if((msqid = msgget(key, IPC_CREAT)) == -1) 
 	{
 		perror("msgget");
@@ -73,7 +72,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
  */
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
-	/* TODO: Detach from shared memory */
+	/* Detach from shared memory */
 	/* detach from the segment: */ 	
 	if(shmdt(sharedMemPtr) == -1)  	
 	{ 		
@@ -130,7 +129,7 @@ void send(const char* fileName)
         if (sndMsg.text[sndMsg.size-1] == '\n') 
         	sndMsg.text[sndMsg.size-1] = '\0';
 
-		/* TODO: Send a message to the receiver telling him that the data is ready 
+		/* Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		sndMsg.mtype = SENDER_DATA_TYPE;
