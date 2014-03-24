@@ -22,7 +22,6 @@ void *sharedMemPtr;
 // The name of the received file
 const char recvFileName[] = "recvfile";
 
-
 /**
  * Sets up the shared memory segment and message queue
  * @param shmid - the id of the allocated shared memory 
@@ -89,13 +88,7 @@ void mainLoop()
 		perror("fopen");	
 		exit(-1);
 	}
-	
-	//msgSize = sizeof()
-	/*if(msgrcv(msqid, &sharedMemPtr, sizeof(message) - sizeof(long), 2, 0))
-	{
-		perror("msgrcv");
-		exit(1);
-	}*/
+
     /* TODO: Receive the message and get the message size. The message will 
    	* contain regular information. The message will be of SENDER_DATA_TYPE
     * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
@@ -106,13 +99,6 @@ void mainLoop()
     * NOTE: the received file will always be saved into the file called
     * "recvfile"
     */
-    recvMessage.mtype = RECV_DONE_TYPE;
-	msgSize = msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.text), recvMessage.mtype, 0);
-	if (msgSize == -1) {
-		perror("msgrcv");
-		exit(-1);
-	}
-
 
 	// Keep receiving until the sender set the size to 0, indicating that
  	// there is no more data to send	
@@ -121,6 +107,13 @@ void mainLoop()
 		// If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
+			// The message is received
+			if (msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.size), 0, 0) == -1) {
+				perror("msgrcv");
+				exit(-1);
+			}
+			msgSize = recvMessage.size;
+
 			// Save the shared memory to file
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) < 0)
 			{
@@ -131,8 +124,12 @@ void mainLoop()
  			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
  			 * does not matter in this case). 
  			 */
-			cout << "HWLLO" << endl;
-			recvMessage.print(fp);
+			recvMessage.mtype = RECV_DONE_TYPE;
+			if(msgsnd (msgid, &recvMessage.text, strlen(recvMessage.text)+1, 0) == -1)
+			{
+	    		perror("Error in send");
+	    		exit(-1);
+	    	}
 			
 			
 		}
