@@ -126,14 +126,21 @@ void send(const char* fileName)
 			exit(-1);
 		}
 		
-			
+		 /* ditch newline at end, if it exists */
+        if (sndMsg.text[sndMsg.size-1] == '\n') 
+        	sndMsg.text[sndMsg.size-1] = '\0';
+
 		/* TODO: Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
-		
+		sndMsg.mtype = SENDER_DATA_TYPE;
+		msgsnd(msqid, (void *) &sndMsg, sizeof(sndMsg.text), 0 /*IPC_NOWAIT*/);
+
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
  		 */
+		rcvMsg.mtype = RECV_DONE_TYPE;
+
 	}
 	
 
