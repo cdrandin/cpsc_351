@@ -7,19 +7,19 @@
 #include <iostream>
 #include "msg.h"    // For the message struct
 
-/* The size of the shared memory chunk */
+// The size of the shared memory chunk
 #define SHARED_MEMORY_CHUNK_SIZE 1024
 
 using namespace std;
 
-/* The ids for the shared memory segment and the message queue */
+// The ids for the shared memory segment and the message queue
 int shmid, msqid;
 int errorcheck;
 
-/* The pointer to the shared memory */
+// The pointer to the shared memory
 void *sharedMemPtr;
 
-/* The name of the received file */
+// The name of the received file
 const char recvFileName[] = "recvfile";
 
 
@@ -131,10 +131,10 @@ void mainLoop()
  			 * does not matter in this case). 
  			 */
 		}
-		/* We are done */
+		// We are done
 		else
 		{
-			/* Close the file */
+			// Close the file
 			fclose(fp);
 		}
 	}
@@ -175,7 +175,7 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
  */
 void ctrlCSignal(int signal)
 {
-	/* Free system V resources */
+	// Free system V resources
 	cout << "mark's the best" << endl;
 	cleanUp(shmid, msqid, sharedMemPtr);
 }
