@@ -1,15 +1,17 @@
+#include <iostream>
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cstring>
 #include "msg.h"    /* For the message struct */
 
 /* The size of the shared memory chunk */
 #define SHARED_MEMORY_CHUNK_SIZE 1000
 
 /* The ids for the shared memory segment and the message queue */
-int shmid, msqid;
+int shmid, msgid;
 
 /* The pointer to the shared memory */
 void* sharedMemPtr;
@@ -17,10 +19,10 @@ void* sharedMemPtr;
 /**
  * Sets up the shared memory segment and message queue
  * @param shmid - the id of the allocated shared memory 
- * @param msqid - the id of the shared memory
+ * @param msgid - the id of the shared memory
  */
 
-void init(int& shmid, int& msqid, void*& sharedMemPtr)
+void init(int& shmid, int& msgid, void*& sharedMemPtr)
 {
 	/*  1. Create a file called keyfile.txt containing string "Hello world" (you may do
  		    so manually or from the code).
@@ -55,7 +57,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		perror("shmat");
 	
 	/* Create a message queue */
-	if((msqid = msgget(key, IPC_CREAT)) == -1) 
+	if((msgid = msgget(key, IPC_CREAT)) == -1) 
 	{
 		perror("msgget");
 		exit(1);
@@ -68,9 +70,9 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
  * Performs the cleanup functions
  * @param sharedMemPtr - the pointer to the shared memory
  * @param shmid - the id of the shared memory segment
- * @param msqid - the id of the message queue
+ * @param msgid - the id of the message queue
  */
-void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
+void cleanUp(const int& shmid, const int& msgid, void* sharedMemPtr)
 {
 	/* Detach from shared memory */
 	/* detach from the segment: */ 	
@@ -97,7 +99,6 @@ void send(const char* fileName)
 {
 	/* Open the file for reading */
 	FILE* fp = fopen(fileName, "r");
-	
 
 	/* A buffer to store message we will send to the receiver. */
 	message sndMsg; 
@@ -124,22 +125,32 @@ void send(const char* fileName)
 			perror("fread");
 			exit(-1);
 		}
+	
+		fscanf (fp, "%s", sndMsg.text);
 		
 		 /* ditch newline at end, if it exists */
         if (sndMsg.text[sndMsg.size-1] == '\n') 
-        	sndMsg.text[sndMsg.size-1] = '\0';
+        	sndMsg.text[sndMsg.size-1]  = '\0';
 
 		/* Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		sndMsg.mtype = SENDER_DATA_TYPE;
-		msgsnd(msqid, (void *) &sndMsg, sizeof(sndMsg.text), 0 /*IPC_NOWAIT*/);
 
+		std::cout << "Message is " << sndMsg.text << std::endl;
+		std::cout << getpid() << " Entering Send process" << std::endl;
+
+		//msgsnd(msgid, (void *) &sndMsg, sizeof(sndMsg.text), 0 /*IPC_NOWAIT*/);
+		int send_val = msgsnd (msgid, &sndMsg.text, sizeof(sndMsg.text), IPC_NOWAIT);
+		if(send_val == -1)
+    		perror("Errror in send");
+
+		//exit(1);
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
  		 */
-		rcvMsg.mtype = RECV_DONE_TYPE;
-
+		if(rcvMsg.mtype == RECV_DONE_TYPE)
+			;
 	}
 	
 
@@ -165,13 +176,13 @@ int main(int argc, char** argv)
 	}
 		
 	/* Connect to shared memory and the message queue */
-	init(shmid, msqid, sharedMemPtr);
+	init(shmid, msgid, sharedMemPtr);
 	
 	/* Send the file */
 	send(argv[1]);
 	
 	/* Cleanup */
-	cleanUp(shmid, msqid, sharedMemPtr);
+	cleanUp(shmid, msgid, sharedMemPtr);
 		
 	return 0;
 }
