@@ -16,6 +16,9 @@ struct message
 	
 	/* How many bytes in the message */
 	int size;
+
+	// Data that will be added to the queue
+	//char mtext[1];
 	
 	/**
  	 * Prints the structure
