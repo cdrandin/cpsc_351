@@ -103,18 +103,17 @@ void mainLoop()
 
 	// Keep receiving until the sender set the size to 0, indicating that
  	// there is no more data to send	
-	while(msgSize != 0)
-	{	
+	do {	
+		// The message is received
+		if (msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.size), 0, 0) == -1) {
+			perror("msgrcv");
+			exit(-1);
+		}
+		msgSize = recvMessage.size;
+
 		// If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
-			// The message is received
-			if (msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.size), 0, 0) == -1) {
-				perror("msgrcv");
-				exit(-1);
-			}
-			msgSize = recvMessage.size;
-
 			// Save the shared memory to file
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) < 0)
 			{
@@ -140,7 +139,7 @@ void mainLoop()
 			// Close the file
 			fclose(fp);
 		}
-	}
+	} while (msgSize != 0);
 }
 
 
