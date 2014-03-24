@@ -69,6 +69,20 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
+	/* detach from the segment: */ 	
+	if(shmdt(sharedMemPtr) == -1)  	
+	{ 		
+		perror("shmdt"); 		
+		exit(1); 	
+	}  	
+
+	/* deletes the shared memory segment */ 	
+	/* 	
+	if(shmctl(shmid, IPC_RMID, NULL) == -1) 	
+	{ 	perror("shmctl"); 		
+		exit(1); 	
+	} 	
+	*/
 }
 
 /**
