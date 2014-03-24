@@ -34,11 +34,16 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		    may have the same key.
 	 */
 	/* make the key: */
-	key_t key = ftok("keyfile.txt", 'a');
-	
+	key_t key;
+	if(key = ftok("/tmp", 'a') == (key_t) -1) 
+	{
+		perror("IPC error: ftok"); 
+		exit(1);
+	}
+
 	/* TODO: Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
 	/* connect to (and possibly create) the segment: */
-	if ((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) 
+	if((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) 
 	{
 		perror("shmget");
 		exit(1);
@@ -47,11 +52,11 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	/* TODO: Attach to the shared memory */
     /* attach to the segment to get a pointer to it: */
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
-	if (sharedMemPtr == (char *)(-1))
+	if(sharedMemPtr == (char *)(-1))
 		perror("shmat");
 	
 	/* TODO: Create a message queue */
-	if ((msqid = msgget(key, IPC_CREAT)) == -1) 
+	if((msqid = msgget(key, IPC_CREAT)) == -1) 
 	{
 		perror("msgget");
 		exit(1);
