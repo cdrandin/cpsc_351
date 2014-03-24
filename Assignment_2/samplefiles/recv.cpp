@@ -104,13 +104,17 @@ void mainLoop()
 	// Keep receiving until the sender set the size to 0, indicating that
  	// there is no more data to send	
 	do {	
+
+		puts("here1");
 		// The message is received
-		if (msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.size), 0, 0) == -1) {
+		if (msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.size), 0, 0 /*IPC_NOWAIT*/) == -1) {
 			perror("msgrcv");
+			puts("here2");
 			exit(-1);
 		}
+		puts("here");
 		msgSize = recvMessage.size;
-
+		std::cout << msgSize << std::endl;
 		// If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
@@ -139,6 +143,7 @@ void mainLoop()
 			// Close the file
 			fclose(fp);
 		}
+
 	} while (msgSize != 0);
 }
 
