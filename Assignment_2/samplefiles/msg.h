@@ -1,8 +1,8 @@
-/* The information type */
+// The information type
 
 #define SENDER_DATA_TYPE 1
 
-/* The done message */
+// The done message
 #define RECV_DONE_TYPE 2
 
 /**
@@ -11,16 +11,16 @@
 
 struct message
 {
-	/* The message type */
+	// The message type
 	long mtype;
 	
-	/* How many bytes in the message */
+	// How many bytes in the message
 	int size;
 
 	// Data that will be added to the queue
 	//char mtext[1];
 	
-	/* Send message across */
+	// Send message across
 	char text[20];
 	
 	/**

@@ -91,11 +91,11 @@ void mainLoop()
 	}
 	
 	//msgSize = sizeof()
-	if(msgrcv(msqid, &sharedMemPtr, sizeof(message) - sizeof(long), 2, 0))
+	/*if(msgrcv(msqid, &sharedMemPtr, sizeof(message) - sizeof(long), 2, 0))
 	{
 		perror("msgrcv");
 		exit(1);
-	}
+	}*/
     /* TODO: Receive the message and get the message size. The message will 
      * contain regular information. The message will be of SENDER_DATA_TYPE
      * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
@@ -176,19 +176,15 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 void ctrlCSignal(int signal)
 {
 	// Free system V resources
-	cout << "mark's the best" << endl;
+	cout << "\nMark's the best" << endl;
 	cleanUp(shmid, msqid, sharedMemPtr);
 }
 
 int main(int argc, char** argv)
 {
+	//struct message buffer;
+	// Calls the cleanUp() function when the user presses Ctrl-C
 	signal(SIGINT, ctrlCSignal);
-	
-	/* TODO: Install a singnal handler (see signaldemo.cpp sample file).
- 	 * In a case user presses Ctrl-c your program should delete message
- 	 * queues and shared memory before exiting. You may add the cleaning functionality
- 	 * in ctrlCSignal().
- 	 */
 				
 	// Initialize
 	init(shmid, msqid, sharedMemPtr);
