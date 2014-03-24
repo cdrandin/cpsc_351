@@ -8,7 +8,7 @@
 #include "msg.h"    /* For the message struct */
 
 /* The size of the shared memory chunk */
-#define SHARED_MEMORY_CHUNK_SIZE 1024
+#define SHARED_MEMORY_CHUNK_SIZE 1000
 
 /* The ids for the shared memory segment and the message queue */
 int shmid, msgid;
@@ -125,27 +125,31 @@ void send(const char* fileName)
 			perror("fread");
 			exit(-1);
 		}
-	
-		fscanf (fp, "%s", sndMsg.text);
-		
-		 /* ditch newline at end, if it exists */
-        if (sndMsg.text[sndMsg.size-1] == '\n') 
-        	sndMsg.text[sndMsg.size-1]  = '\0';
+		else
+			rewind(fp);
 
 		/* Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		sndMsg.mtype = SENDER_DATA_TYPE;
 
-		std::cout << "Message is " << sndMsg.text << std::endl;
-		std::cout << getpid() << " Entering Send process" << std::endl;
+		fscanf(fp,"%s", sndMsg.text);
+
+		 /* ditch newline at end, if it exists */
+        if (sndMsg.text[sndMsg.size-1] == '\n') 
+        	sndMsg.text[sndMsg.size-1]  = '\0';
+
+		std::cout << "Message sent is " << sndMsg.text << std::endl;
 
 		//msgsnd(msgid, (void *) &sndMsg, sizeof(sndMsg.text), 0 /*IPC_NOWAIT*/);
-		int send_val = msgsnd (msgid, &sndMsg.text, sizeof(sndMsg.text), IPC_NOWAIT);
-		if(send_val == -1)
+		if(msgsnd (msgid, &sndMsg.text, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
+		{
     		perror("Errror in send");
+    		exit(-1);
+    	}
+    	else
+    		puts("Sent message");
 
-		//exit(1);
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
  		 */
@@ -159,10 +163,17 @@ void send(const char* fileName)
  	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
 
+
+ 	// Destroy message queue connection
+	if (msgctl(msgid, IPC_RMID, NULL) == -1) 
+	{
+		perror("msgctl");
+		exit(1);
+	} 
 		
 	/* Close the file */
 	fclose(fp);
-	
+	free(sharedMemPtr);
 }
 
 int main(int argc, char** argv)
