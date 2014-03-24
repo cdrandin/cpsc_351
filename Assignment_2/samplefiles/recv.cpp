@@ -26,47 +26,43 @@ const char recvFileName[] = "recvfile";
  * @param msqid - the id of the shared memory
  * @param sharedMemPtr - the pointer to the shared memory
  */
-
 void init(int& shmid, int& msqid, void*& sharedMemPtr)
 {
-	
+	/* 1. Create a file called keyfile.txt containing string "Hello world" (you may do
+		    so manually or from the code).
+     2. Use ftok("keyfile.txt", 'a') in order to generate the key.
+	 3. Use the key in the TODO's below. Use the same key for the queue
+	    and the shared memory segment. This also serves to illustrate the difference
+	    between the key and the id used in message queues and shared memory. The id
+	    for any System V object (i.e. message queues, shared memory, and sempahores) 
+	    is unique system-wide among all System V objects. Two objects, on the other hand,
+	    may have the same key.
+	*/
+	// generate key
 	key_t key = ftok("keyfile.txt", 'a');
 	if (key == -1) {
         perror("ftok");
         exit(1);
     }
-
-	/* TODO: 1. Create a file called keyfile.txt containing string "Hello world" (you may do
- 		    so manually or from the code).
-	         2. Use ftok("keyfile.txt", 'a') in order to generate the key.
-		 3. Use the key in the TODO's below. Use the same key for the queue
-		    and the shared memory segment. This also serves to illustrate the difference
-		    between the key and the id used in message queues and shared memory. The id
-		    for any System V object (i.e. message queues, shared memory, and sempahores) 
-		    is unique system-wide among all System V objects. Two objects, on the other hand,
-		    may have the same key.
-	 */
 	
-	/* TODO: Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE. */
+	// Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE.
 	// shmid: shared memory ID
     if ((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) {
         perror("shmget");
         exit(1);
     }
 
-	/* TODO: Attach to the shared memory */
+	// Attach to the shared memory
 	sharedMemPtr = shmat(shmid, (void*)0 , 0); // let OS choose address; read and write
 	if(sharedMemPtr == (char*)(-1)){
 		perror("shmat");
 		exit(1);
 	}
 
-	/* TODO: Create a message queue */
+	// Create a message queue
 	msqid = msgget(key, IPC_CREAT);
 	if(msqid == -1)
 		perror("msqid");
-
-	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
 }
  
 
@@ -128,7 +124,6 @@ void mainLoop()
 }
 
 
-
 /**
  * Perfoms the cleanup functions
  * @param sharedMemPtr - the pointer to the shared memory
@@ -137,19 +132,19 @@ void mainLoop()
  */
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
-	/* TODO: Detach from shared memory */
+	// Detach from shared memory
     if (shmdt(sharedMemPtr) == -1) { // detach
         perror("shmdt");
         exit(1);
     }
 
-   	/* TODO: Deallocate the shared memory chunk */	
+   	// Deallocate the shared memory chunk	
     if (shmctl(shmid, IPC_RMID, NULL) == -1) { // remove
     	perror("shmctl");
     	exit(1);
     }
 	
-	/* TODO: Deallocate the message queue */
+	// Deallocate the message queue
 	if (msgctl(msqid, IPC_RMID, NULL) == -1) {
 		perror("msgctl");
 		exit(1);
