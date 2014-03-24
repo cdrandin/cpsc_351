@@ -17,6 +17,9 @@ struct message
 	/* How many bytes in the message */
 	int size;
 	
+	/* Send message across */
+	char text[20];
+	
 	/**
  	 * Prints the structure
  	 * @param fp - the file stream to print to
