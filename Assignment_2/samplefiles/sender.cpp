@@ -120,7 +120,7 @@ void send(const char* fileName)
  		 * fread will return how many bytes it has actually read (since the last chunk may be less
  		 * than SHARED_MEMORY_CHUNK_SIZE).
  		 */
-		if((sndMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
+		if((rcvMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
 		{
 			perror("fread");
 			exit(-1);
@@ -131,28 +131,34 @@ void send(const char* fileName)
 		/* Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
-		sndMsg.mtype = SENDER_DATA_TYPE;
+		rcvMsg.mtype = SENDER_DATA_TYPE;
 		
-		sndMsg.text = new char[sndMsg.size];
-		fscanf(fp,"%s", sndMsg.text);
+		rcvMsg.text = new char[rcvMsg.size];
+		fscanf(fp,"%s", rcvMsg.text);
 
 		 /* ditch newline at end, if it exists */
-        if (sndMsg.text[sndMsg.size-1] == '\n') 
-        	sndMsg.text[sndMsg.size-1]  = '\0';
+        if (rcvMsg.text[rcvMsg.size-1] == '\n') 
+        	rcvMsg.text[rcvMsg.size-1]  = '\0';
 
-		if(msgsnd (msgid, &sndMsg.text, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
+		if(msgsnd (msgid, &rcvMsg, strlen(rcvMsg.text)+1, IPC_NOWAIT) == -1)
 		{
     		perror("Errror in send");
     		break;
     	}
     	else
-    		std::cout << "Message sent is " << sndMsg.text << std::endl;
+    		std::cout << "Message sent is " << rcvMsg.text << std::endl;
 
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
  		 */
+		if(msgrcv(msgid, &rcvMsg, strlen(rcvMsg.text)+1, SENDER_DATA_TYPE, IPC_NOWAIT) == -1)
+		{
+			perror("msgrcv");
+			exit(1);
+		}
+
 		if(rcvMsg.mtype == RECV_DONE_TYPE)
-			;
+			puts("DONE");
 	}
 	
 
