@@ -132,6 +132,7 @@ void send(const char* fileName)
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		sndMsg.mtype = SENDER_DATA_TYPE;
+		
 		sndMsg.text = new char[sndMsg.size];
 		fscanf(fp,"%s", sndMsg.text);
 
@@ -139,16 +140,13 @@ void send(const char* fileName)
         if (sndMsg.text[sndMsg.size-1] == '\n') 
         	sndMsg.text[sndMsg.size-1]  = '\0';
 
-		std::cout << "Message sent is " << sndMsg.text << std::endl;
-
-		//msgsnd(msgid, (void *) &sndMsg, sizeof(sndMsg.text), 0 /*IPC_NOWAIT*/);
 		if(msgsnd (msgid, &sndMsg.text, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
 		{
     		perror("Errror in send");
-    		exit(-1);
+    		break;
     	}
     	else
-    		puts("Sent message");
+    		std::cout << "Message sent is " << sndMsg.text << std::endl;
 
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
@@ -163,6 +161,8 @@ void send(const char* fileName)
  	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
 
+ 	rcvMsg.mtype = SENDER_DATA_TYPE;
+ 	rcvMsg.size = 0;
 
  	// Destroy message queue connection
 	if (msgctl(msgid, IPC_RMID, NULL) == -1) 
