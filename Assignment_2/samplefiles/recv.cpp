@@ -4,10 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "msg.h"    /* For the message struct */
+#include <iostream>
+#include "msg.h"    // For the message struct
 
 /* The size of the shared memory chunk */
-#define SHARED_MEMORY_CHUNK_SIZE 1000
+#define SHARED_MEMORY_CHUNK_SIZE 1024
+
+using namespace std;
 
 /* The ids for the shared memory segment and the message queue */
 int shmid, msqid;
@@ -71,19 +74,25 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
  */
 void mainLoop()
 {
-	/* The size of the mesage */
+	// The size of the mesage
 	int msgSize = 0;
 	
-	/* Open the file for writing */
+	// Open the file for writing
 	FILE* fp = fopen(recvFileName, "w");
 		
-	/* Error checks */
+	// Error checks
 	if(!fp)
 	{
 		perror("fopen");	
 		exit(-1);
 	}
-		
+	
+	//msgSize = sizeof()
+	if(msgrcv(msqid, &sharedMemPtr, sizeof(message) - sizeof(long), 2, 0))
+	{
+		perror("msgrcv");
+		exit(1);
+	}
     /* TODO: Receive the message and get the message size. The message will 
      * contain regular information. The message will be of SENDER_DATA_TYPE
      * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
@@ -103,7 +112,7 @@ void mainLoop()
 		/* If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
-			/* Save the shared memory to file */
+			// Save the shared memory to file
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) < 0)
 			{
 				perror("fwrite");
@@ -159,11 +168,13 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 void ctrlCSignal(int signal)
 {
 	/* Free system V resources */
+	cout << "mark's the best" << endl;
 	cleanUp(shmid, msqid, sharedMemPtr);
 }
 
 int main(int argc, char** argv)
 {
+	signal(SIGINT, ctrlCSignal);
 	
 	/* TODO: Install a singnal handler (see signaldemo.cpp sample file).
  	 * In a case user presses Ctrl-c your program should delete message
@@ -171,13 +182,13 @@ int main(int argc, char** argv)
  	 * in ctrlCSignal().
  	 */
 				
-	/* Initialize */
+	// Initialize
 	init(shmid, msqid, sharedMemPtr);
 	
-	/* Go to the main loop */
+	// Go to the main loop
 	mainLoop();
 
-	/** TODO: Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup) **/
+	// Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup)
 	cleanUp(shmid, msqid, sharedMemPtr);
 	
 	return 0;

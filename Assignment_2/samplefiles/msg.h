@@ -16,6 +16,9 @@ struct message
 	
 	/* How many bytes in the message */
 	int size;
+
+	// Data that will be added to the queue
+	//char mtext[1];
 	
 	/* Send message across */
 	char text[20];
