@@ -132,9 +132,12 @@ void send(const char* fileName)
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		rcvMsg.mtype = SENDER_DATA_TYPE;
+
+		for(int i=0;i<rcvMsg.size;++i)
+			std::cout << static_cast<char*>(sharedMemPtr)[i];
+		puts("");
 		
-		rcvMsg.text = new char[rcvMsg.size];
-		fscanf(fp,"%s", rcvMsg.text);
+		exit(1);
 
 		 /* ditch newline at end, if it exists */
         if (rcvMsg.text[rcvMsg.size-1] == '\n') 
