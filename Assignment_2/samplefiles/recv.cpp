@@ -74,79 +74,59 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
  */
 void mainLoop()
 {
-	// The size of the mesage
+	/* The size of the mesage */
 	int msgSize = 0;
-
-	// Store message received from the sender.
-	message recvMessage;
 	
-	// Open the file for writing
+	/* Open the file for writing */
 	FILE* fp = fopen(recvFileName, "w");
 		
-	// Error checks
+	/* Error checks */
 	if(!fp)
 	{
 		perror("fopen");	
 		exit(-1);
 	}
+	
 
-    /* TODO: Receive the message and get the message size. The message will 
-   	* contain regular information. The message will be of SENDER_DATA_TYPE
-    * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
-    * of the message is not 0, then we copy that many bytes from the shared
-    * memory region to the file. Otherwise, if 0, then we close the file and
-    * exit.
-    *
-    * NOTE: the received file will always be saved into the file called
-    * "recvfile"
-    */
-
-	// Keep receiving until the sender set the size to 0, indicating that
- 	// there is no more data to send	
-	do {	
-
-		puts("here1");
-		// The message is received
-		if (msgrcv(msqid, (void *) &recvMessage, sizeof(recvMessage.size), 0, 0 /*IPC_NOWAIT*/) == -1) {
-			perror("msgrcv");
-			puts("here2");
-			exit(-1);
-		}
-		puts("here");
-		msgSize = recvMessage.size;
-		std::cout << msgSize << std::endl;
-		// If the sender is not telling us that we are done, then get to work */
-		if(msgSize != 0)
+	/* Keep receiving until the sender set the size to 0, indicating that
+ 	 * there is no more data to send
+ 	 */	
+	/*declare messages*/
+	message rcvMsg;
+	rcvMsg.size = 0;
+	message sndMsg;
+	sndMsg.mtype = RECV_DONE_TYPE;
+	sndMsg.size = 1;
+	do
+	{	
+		if(msgrcv (msqid, &rcvMsg, sizeof(message) - sizeof(long),SENDER_DATA_TYPE,0) < 0)
 		{
-			// Save the shared memory to file
+			perror("msgrcv");
+			exit(-1);
+		}else{
+			msgSize = rcvMsg.size;
+		}
+
+		/* If the sender is not telling us that we are done, then get to work */
+		/* Save the shared memory to file */
+		if(msgSize > 0)
+		{
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) < 0)
 			{
 				perror("fwrite");
 			}
-			
+			if(msgsnd(msqid, &sndMsg, sizeof(message)-sizeof(long), 0)<0)
+			{
+				perror("msgsnd2");
+				exit(-1);
+			}
+		}	
 			/* TODO: Tell the sender that we are ready for the next file chunk. 
  			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
  			 * does not matter in this case). 
  			 */
-			recvMessage.mtype = RECV_DONE_TYPE;
-			if(msgsnd (msqid, &recvMessage.text, strlen(recvMessage.text)+1, 0) == -1)
-			{
-	    		perror("Error in send");
-	    		exit(-1);
-	    	}
-			
-			
-		}
-		// We are done
-		else
-		{
-			// Close the file
-			fclose(fp);
-		}
-
-	} while (msgSize != 0);
+	}while(msgSize != 0);
 }
-
 
 /**
  * Perfoms the cleanup functions
