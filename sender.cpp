@@ -37,32 +37,36 @@ void init(int& shmid, int& msgid, void*& sharedMemPtr)
 		    may have the same key.
 	 */
 	/* make the key: */
-	key_t key;
-	if(key = ftok("/tmp", 'a') == (key_t) -1) 
+	key_t key = ftok("keyfile.txt", 'a');
+	if(key < (key_t) 0) 
 	{
 		perror("IPC error: ftok"); 
-		exit(1);
+		exit(-1);
 	}
 
 	/* Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
 	/* connect to (and possibly create) the segment: */
-	if((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) 
+	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT);
+	if( shmid < 0) 
 	{
 		perror("shmget");
-		exit(1);
+		exit(-1);
 	}
 
 	/* Attach to the shared memory */
     /* attach to the segment to get a pointer to it: */
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
-	if(sharedMemPtr == (char *)(-1))
+	if(sharedMemPtr < (char *)(0))
+	{
 		perror("shmat");
-	
+		exit(-1);
+	}
 	/* Create a message queue */
-	if((msgid = msgget(key, IPC_CREAT)) == -1) 
+	msgid = msgget(key, /*IPC_CREAT*/ 0666);
+	if( msgid < 0) 
 	{
 		perror("msgget");
-		exit(1);
+		exit(-1);
 	}
 	
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
@@ -77,12 +81,7 @@ void init(int& shmid, int& msgid, void*& sharedMemPtr)
 void cleanUp(const int& shmid, const int& msgid, void* sharedMemPtr)
 {
 	/* Detach from shared memory */
-	/* detach from the segment: */ 	
-	if(shmdt(sharedMemPtr) == -1)  	
-	{ 		
-		perror("shmdt"); 		
-		exit(1); 	
-	}  	
+	if(shmdt(sharedMemPtr) < 0)	perror("shmdt"); 		
 
 	/* deletes the shared memory segment */ 	
 	/* 	
@@ -128,15 +127,8 @@ void send(const char* fileName)
 			perror("fread");
 			exit(-1);
 		}
-		
-		// store partials of the file into sndMsg
-		sndMsg.text = static_cast<char*>(sharedMemPtr);
-
-		 /* ditch newline at end, if it exists */
-        if (sndMsg.text[sndMsg.size-1] == '\n') 
-        	sndMsg.text[sndMsg.size-1]  = '\0';
-
-		if(msgsnd (msgid, &sndMsg, sizeof(sndMsg) - sizeof(long), IPC_NOWAIT) == -1)
+	
+		if(msgsnd (msgid, &sndMsg, sizeof(sndMsg) - sizeof(long), 0) < 0)
 		{
     		perror("msgsnd failed");
     		exit(-1);
@@ -144,7 +136,7 @@ void send(const char* fileName)
     	
     	if(sndMsg.size != 0)
 		{
-			if(msgrcv(msgid, &rcvMsg, sizeof(rcvMsg)-sizeof(long),RECV_DONE_TYPE,0)<0) 
+			if(msgrcv(msgid, &rcvMsg, sizeof(rcvMsg)-sizeof(long),RECV_DONE_TYPE,0) < 0) 
 			{
 				perror("msgrcv");
 				exit(-1);
@@ -152,16 +144,10 @@ void send(const char* fileName)
 		}
 	}
 	
-
 	/** TODO: once we are out of the above loop, we have finished sending the file.
  	  * Lets tell the receiver that we have nothing more to send. We will do this by
  	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
-
- 	sndMsg.mtype = SENDER_DATA_TYPE;
- 	sndMsg.size = 0;
- 	strcpy(sndMsg.text, "");
-
  	if(msgsnd(msgid, &sndMsg, sizeof(sndMsg)-sizeof(long),0) < 0) 
 	{
 		perror("msgsend");
@@ -174,7 +160,7 @@ void send(const char* fileName)
 		perror("msgctl");
 		exit(1);
 	} 
-		
+	
 	/* Close the file */
 	fclose(fp);
 	free(sharedMemPtr);
