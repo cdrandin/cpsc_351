@@ -16,6 +16,8 @@ int shmid, msgid;
 /* The pointer to the shared memory */
 void* sharedMemPtr;
 
+long int file_pos = 0;
+
 /**
  * Sets up the shared memory segment and message queue
  * @param shmid - the id of the allocated shared memory 
@@ -120,48 +122,70 @@ void send(const char* fileName)
  		 * fread will return how many bytes it has actually read (since the last chunk may be less
  		 * than SHARED_MEMORY_CHUNK_SIZE).
  		 */
+
+		// move file pointer position to its approriate spot
+		fseek(fp, file_pos, SEEK_SET);
+
 		if((rcvMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
 		{
 			perror("fread");
 			exit(-1);
 		}
-		else
-			rewind(fp);
+		
+		// mark current file positionon
+		file_pos = ftell(fp);
 
 		/* Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
 		rcvMsg.mtype = SENDER_DATA_TYPE;
 
-		for(int i=0;i<rcvMsg.size;++i)
-			std::cout << static_cast<char*>(sharedMemPtr)[i];
-		puts("");
-		
-		exit(1);
+		// store partials of the file into rcvMsg
+		rcvMsg.text = static_cast<char*>(sharedMemPtr);
 
+		
 		 /* ditch newline at end, if it exists */
         if (rcvMsg.text[rcvMsg.size-1] == '\n') 
         	rcvMsg.text[rcvMsg.size-1]  = '\0';
 
 		if(msgsnd (msgid, &rcvMsg, strlen(rcvMsg.text)+1, IPC_NOWAIT) == -1)
 		{
-    		perror("Error in send");
-    		break;
+    		perror("msgsnd failed");
+    		exit(-1);
     	}
+    	/*
+    	// display what is being sent for testing
     	else
-    		std::cout << "Message sent is " << rcvMsg.text << std::endl;
+    	{
+    		puts("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    		std::cout << "Message sent is:\n";
+    		for(int i=0;i<rcvMsg.size;++i)
+    			std::cout << rcvMsg.text[i];
+    		puts("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    	}
+    	*/
+
 
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
  		 */
-		if(msgrcv(msgid, &rcvMsg, strlen(rcvMsg.text)+1, SENDER_DATA_TYPE, IPC_NOWAIT) == -1)
-		{
-			perror("msgrcv");
-			exit(1);
-		}
+ 		 // just keep waiting till we get a message
+ 		 while(true)
+ 		 {		
+ 		 	if(msgrcv(msgid, &rcvMsg, strlen(rcvMsg.text)+1, SENDER_DATA_TYPE, IPC_NOWAIT) == -1)
+			{
+				perror("msgrcv failed");
+				exit(-1);
+			}
+			else 
+				puts("I got something!");
 
-		if(rcvMsg.mtype == RECV_DONE_TYPE)
-			puts("DONE");
+			if(rcvMsg.mtype == RECV_DONE_TYPE)
+			{
+				puts("I got the signal! Send more stuff.");
+				break;
+			}
+ 		 }
 	}
 	
 
