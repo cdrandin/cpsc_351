@@ -50,7 +50,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	
 	// Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE.
 	// shmid: shared memory ID
-    if ((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT)) == -1) {
+    if ((shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT | 0666)) == -1) {
         perror("shmget");
         exit(1);
     }
@@ -63,9 +63,11 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	}
 
 	// Create a message queue
-	msqid = msgget(key, IPC_CREAT);
-	if(msqid == -1)
+	msqid = msgget(key, IPC_CREAT | 0666);
+	if(msqid == -1) {
 		perror("msqid");
+		exit(1);
+	}
 }
  
 
