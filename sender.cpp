@@ -4,39 +4,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <cstring>
-#include "msg.h"    /* For the message struct */
+#include "msg.h"    // For the message struct
 
-/* The size of the shared memory chunk */
+// The size of the shared memory chunk
 #define SHARED_MEMORY_CHUNK_SIZE 1024
 
-/* The ids for the shared memory segment and the message queue */
-int shmid, msgid;
+int shmid, msgid;		// The ids for the shared memory segment and the message queue
+void* sharedMemPtr;		// The pointer to the shared memory
 
-/* The pointer to the shared memory */
-void* sharedMemPtr;
-
-long int file_pos = 0;
-
-/**
- * Sets up the shared memory segment and message queue
- * @param shmid - the id of the allocated shared memory 
- * @param msgid - the id of the shared memory
- */
-
+// Sets up the shared memory segment and message queue
+// @param shmid - the id of the allocated shared memory 
+// @param msgid - the id of the shared memory
 void init(int& shmid, int& msgid, void*& sharedMemPtr)
 {
-	/*  1. Create a file called keyfile.txt containing string "Hello world" (you may do
- 		    so manually or from the code).
-	    2. Use ftok("keyfile.txt", 'a') in order to generate the key.
-		3. Use the key in the TODO's below. Use the same key for the queue
-		    and the shared memory segment. This also serves to illustrate the difference
-		    between the key and the id used in message queues and shared memory. The id
-		    for any System V objest (i.e. message queues, shared memory, and sempahores) 
-		    is unique system-wide among all SYstem V objects. Two objects, on the other hand,
-		    may have the same key.
-	 */
-	/* make the key: */
+	// Make the key:
 	key_t key = ftok("keyfile.txt", 'a');
 	if(key < (key_t) 0) 
 	{
@@ -44,91 +25,78 @@ void init(int& shmid, int& msgid, void*& sharedMemPtr)
 		exit(-1);
 	}
 
-	/* Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
-	/* connect to (and possibly create) the segment: */
+	// Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE
+	// Connect to (and possibly create) the segment:
 	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT);
-	if( shmid < 0) 
+	if(shmid < 0) 
 	{
 		perror("shmget");
 		exit(-1);
 	}
 
-	/* Attach to the shared memory */
-    /* attach to the segment to get a pointer to it: */
+	// Attach to the shared memory
+    // attach to the segment to get a pointer to it:
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
 	if(sharedMemPtr < (char *)(0))
 	{
 		perror("shmat");
 		exit(-1);
 	}
-	/* Create a message queue */
-	msgid = msgget(key, /*IPC_CREAT*/ 0666);
-	if( msgid < 0) 
+	// Create a message queue
+	msgid = msgget(key, 0666);
+	if(msgid < 0) 
 	{
 		perror("msgget");
 		exit(-1);
 	}
 	
-	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
+	// Store the IDs and the pointer to the shared memory region in the corresponding parameters
 }
 
-/**
- * Performs the cleanup functions
- * @param sharedMemPtr - the pointer to the shared memory
- * @param shmid - the id of the shared memory segment
- * @param msgid - the id of the message queue
- */
+
+// Performs the cleanup functions
+// @param sharedMemPtr - the pointer to the shared memory
+// @param shmid - the id of the shared memory segment
+// @param msgid - the id of the message queue
 void cleanUp(const int& shmid, const int& msgid, void* sharedMemPtr)
 {
-	/* Detach from shared memory */
-	if(shmdt(sharedMemPtr) < 0)	perror("shmdt"); 		
-
-	/* deletes the shared memory segment */ 	
-	/* 	
-	if(shmctl(shmid, IPC_RMID, NULL) == -1) 	
-	{ 	perror("shmctl"); 		
-		exit(1); 	
-	} 	
-	*/
+	// Detach from shared memory
+	if(shmdt(sharedMemPtr) < 0)
+		perror("shmdt");
 }
 
-/**
- * The main send function
- * @param fileName - the name of the file
- */
+// The main send function
+// @param fileName - the name of the file
 void send(const char* fileName)
 {
-	/* Open the file for reading */
+	// Open the file for reading
 	FILE* fp = fopen(fileName, "r");
 
-	/* A buffer to store message we will send to the receiver. */
+	// A buffer to store message we will send to the receiver.
 	message sndMsg; 
 	sndMsg.mtype = SENDER_DATA_TYPE; 
-
-	/* A buffer to store message received from the receiver. */
-	message rcvMsg;
+	message rcvMsg;			// A buffer to store message received from the receiver.
 	
-	/* Was the file open? */
+	// Was the file open?
 	if(!fp)
 	{
 		perror("fopen");
 		exit(-1);
 	}
 	
-	/* Read the whole file */
+	// Read the whole file
 	while(sndMsg.size != 0)
 	{
-		/* Read at most SHARED_MEMORY_CHUNK_SIZE from the file and store them in shared memory. 
- 		 * fread will return how many bytes it has actually read (since the last chunk may be less
- 		 * than SHARED_MEMORY_CHUNK_SIZE).
- 		 */
+		// Read at most SHARED_MEMORY_CHUNK_SIZE from the file and store them in shared memory. 
+ 		// fread will return how many bytes it has actually read (since the last chunk may be less
+ 		// than SHARED_MEMORY_CHUNK_SIZE).
 		if((sndMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
 		{
 			perror("fread");
 			exit(-1);
 		}
 	
-		if(msgsnd (msgid, &sndMsg, sizeof(sndMsg) - sizeof(long), 0) < 0)
+		if(msgsnd(msgid, &sndMsg, sizeof(sndMsg) - sizeof(long), 0) < 0)
 		{
     		perror("msgsnd failed");
     		exit(-1);
@@ -136,7 +104,7 @@ void send(const char* fileName)
     	
     	if(sndMsg.size != 0)
 		{
-			if(msgrcv(msgid, &rcvMsg, sizeof(rcvMsg)-sizeof(long),RECV_DONE_TYPE,0) < 0) 
+			if(msgrcv(msgid, &rcvMsg, sizeof(rcvMsg) - sizeof(long),RECV_DONE_TYPE,0) < 0) 
 			{
 				perror("msgrcv");
 				exit(-1);
@@ -144,11 +112,7 @@ void send(const char* fileName)
 		}
 	}
 	
-	/** TODO: once we are out of the above loop, we have finished sending the file.
- 	  * Lets tell the receiver that we have nothing more to send. We will do this by
- 	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
-	  */
- 	if(msgsnd(msgid, &sndMsg, sizeof(sndMsg)-sizeof(long),0) < 0) 
+ 	if(msgsnd(msgid, &sndMsg, sizeof(sndMsg) - sizeof(long),0) < 0) 
 	{
 		perror("msgsend");
 		exit(-1);
@@ -161,7 +125,7 @@ void send(const char* fileName)
 		exit(1);
 	} 
 	
-	/* Close the file */
+	// Close the file
 	fclose(fp);
 	free(sharedMemPtr);
 }
@@ -169,20 +133,20 @@ void send(const char* fileName)
 int main(int argc, char** argv)
 {
 	
-	/* Check the command line arguments */
+	// Check the command line arguments
 	if(argc < 2)
 	{
 		fprintf(stderr, "USAGE: %s <FILE NAME>\n", argv[0]);
 		exit(-1);
 	}
 		
-	/* Connect to shared memory and the message queue */
+	// Connect to shared memory and the message queue
 	init(shmid, msgid, sharedMemPtr);
 	
-	/* Send the file */
+	// Send the file
 	send(argv[1]);
 
-	/* Cleanup */
+	// Cleanup
 	cleanUp(shmid, msgid, sharedMemPtr);
 		
 	return 0;
