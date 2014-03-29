@@ -104,7 +104,8 @@ void send(const char* fileName)
 
 	/* A buffer to store message we will send to the receiver. */
 	message sndMsg; 
-	
+	sndMsg.mtype = SENDER_DATA_TYPE; 
+
 	/* A buffer to store message received from the receiver. */
 	message rcvMsg;
 	
@@ -112,80 +113,43 @@ void send(const char* fileName)
 	if(!fp)
 	{
 		perror("fopen");
-		//exit(-1);
+		exit(-1);
 	}
 	
 	/* Read the whole file */
-	while(!feof(fp))
+	while(sndMsg.size != 0)
 	{
 		/* Read at most SHARED_MEMORY_CHUNK_SIZE from the file and store them in shared memory. 
  		 * fread will return how many bytes it has actually read (since the last chunk may be less
  		 * than SHARED_MEMORY_CHUNK_SIZE).
  		 */
-
-		// move file pointer position to its approriate spot
-		fseek(fp, file_pos, SEEK_SET);
-
 		if((sndMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
 		{
 			perror("fread");
-			//exit(-1);
+			exit(-1);
 		}
 		
-		// mark current file positionon
-		file_pos = ftell(fp);
-
-		/* Send a message to the receiver telling him that the data is ready 
- 		 * (message of type SENDER_DATA_TYPE) 
- 		 */
-		sndMsg.mtype = SENDER_DATA_TYPE;
-
 		// store partials of the file into sndMsg
 		sndMsg.text = static_cast<char*>(sharedMemPtr);
 
-		
 		 /* ditch newline at end, if it exists */
         if (sndMsg.text[sndMsg.size-1] == '\n') 
         	sndMsg.text[sndMsg.size-1]  = '\0';
 
-		if(msgsnd (msgid, &sndMsg, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
+		if(msgsnd (msgid, &sndMsg, sizeof(sndMsg) - sizeof(long), IPC_NOWAIT) == -1)
 		{
     		perror("msgsnd failed");
-    		//exit(-1);
+    		exit(-1);
     	}
-    	/*
-    	// display what is being sent for testing
-    	else
-    	{
-    		puts("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-    		std::cout << "Message sent is:\n";
-    		for(int i=0;i<sndMsg.size;++i)
-    			std::cout << sndMsg.text[i];
-    		puts("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-    	}
-    	*/
-
-
-		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
- 		 * that he finished saving the memory chunk. 
- 		 */
- 		 // just keep waiting till we get a message
- 		 while(true)
- 		 {		
- 		 	if(msgrcv(msgid, &rcvMsg, strlen(rcvMsg.text)+1, SENDER_DATA_TYPE, IPC_NOWAIT) == -1)
+    	
+    	if(sndMsg.size != 0)
+		{
+			if(msgrcv(msgid, &rcvMsg, sizeof(rcvMsg)-sizeof(long),RECV_DONE_TYPE,0)<0) 
 			{
-				perror("msgrcv failed");
-				//exit(-1);
+				perror("msgrcv");
+				exit(-1);
 			}
-			else 
-				puts("I got something!");
-
-			if(rcvMsg.mtype == RECV_DONE_TYPE)
-			{
-				puts("I got the signal! Send more stuff.");
-				break;
-			}
- 		 }
+		}
 	}
 	
 
@@ -198,17 +162,17 @@ void send(const char* fileName)
  	sndMsg.size = 0;
  	strcpy(sndMsg.text, "");
 
- 	if(msgsnd (msgid, &sndMsg, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
+ 	if(msgsnd(msgid, &sndMsg, sizeof(sndMsg)-sizeof(long),0) < 0) 
 	{
-		perror("msgsnd failed");
-		//exit(-1);
+		perror("msgsend");
+		exit(-1);
 	}
 
  	// Destroy message queue connection
 	if (msgctl(msgid, IPC_RMID, NULL) == -1) 
 	{
 		perror("msgctl");
-		//exit(1);
+		exit(1);
 	} 
 		
 	/* Close the file */
