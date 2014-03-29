@@ -112,7 +112,7 @@ void send(const char* fileName)
 	if(!fp)
 	{
 		perror("fopen");
-		exit(-1);
+		//exit(-1);
 	}
 	
 	/* Read the whole file */
@@ -126,10 +126,10 @@ void send(const char* fileName)
 		// move file pointer position to its approriate spot
 		fseek(fp, file_pos, SEEK_SET);
 
-		if((rcvMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
+		if((sndMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
 		{
 			perror("fread");
-			exit(-1);
+			//exit(-1);
 		}
 		
 		// mark current file positionon
@@ -138,20 +138,20 @@ void send(const char* fileName)
 		/* Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
-		rcvMsg.mtype = SENDER_DATA_TYPE;
+		sndMsg.mtype = SENDER_DATA_TYPE;
 
-		// store partials of the file into rcvMsg
-		rcvMsg.text = static_cast<char*>(sharedMemPtr);
+		// store partials of the file into sndMsg
+		sndMsg.text = static_cast<char*>(sharedMemPtr);
 
 		
 		 /* ditch newline at end, if it exists */
-        if (rcvMsg.text[rcvMsg.size-1] == '\n') 
-        	rcvMsg.text[rcvMsg.size-1]  = '\0';
+        if (sndMsg.text[sndMsg.size-1] == '\n') 
+        	sndMsg.text[sndMsg.size-1]  = '\0';
 
-		if(msgsnd (msgid, &rcvMsg, strlen(rcvMsg.text)+1, IPC_NOWAIT) == -1)
+		if(msgsnd (msgid, &sndMsg, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
 		{
     		perror("msgsnd failed");
-    		exit(-1);
+    		//exit(-1);
     	}
     	/*
     	// display what is being sent for testing
@@ -159,8 +159,8 @@ void send(const char* fileName)
     	{
     		puts("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     		std::cout << "Message sent is:\n";
-    		for(int i=0;i<rcvMsg.size;++i)
-    			std::cout << rcvMsg.text[i];
+    		for(int i=0;i<sndMsg.size;++i)
+    			std::cout << sndMsg.text[i];
     		puts("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     	}
     	*/
@@ -175,7 +175,7 @@ void send(const char* fileName)
  		 	if(msgrcv(msgid, &rcvMsg, strlen(rcvMsg.text)+1, SENDER_DATA_TYPE, IPC_NOWAIT) == -1)
 			{
 				perror("msgrcv failed");
-				exit(-1);
+				//exit(-1);
 			}
 			else 
 				puts("I got something!");
@@ -194,14 +194,21 @@ void send(const char* fileName)
  	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
 
- 	rcvMsg.mtype = SENDER_DATA_TYPE;
- 	rcvMsg.size = 0;
+ 	sndMsg.mtype = SENDER_DATA_TYPE;
+ 	sndMsg.size = 0;
+ 	strcpy(sndMsg.text, "");
+
+ 	if(msgsnd (msgid, &sndMsg, strlen(sndMsg.text)+1, IPC_NOWAIT) == -1)
+	{
+		perror("msgsnd failed");
+		//exit(-1);
+	}
 
  	// Destroy message queue connection
 	if (msgctl(msgid, IPC_RMID, NULL) == -1) 
 	{
 		perror("msgctl");
-		exit(1);
+		//exit(1);
 	} 
 		
 	/* Close the file */
