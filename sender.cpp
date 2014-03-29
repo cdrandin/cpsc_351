@@ -174,7 +174,7 @@ void send(const char* fileName)
  		 {		
  		 	if(msgrcv(msgid, &rcvMsg, strlen(rcvMsg.text)+1, SENDER_DATA_TYPE, IPC_NOWAIT) == -1)
 			{
-				//perror("msgrcv failed");
+				perror("msgrcv failed");
 				//exit(-1);
 			}
 			else 

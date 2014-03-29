@@ -1,3 +1,9 @@
+**** THIS FILE IS NOT CODE.  CHRIS WAS TOO LAZY TO PASTE IPSUM LOREM BLAH BLAH
+
+
+
+
+
 Hello world
 
 #include <iostream>
