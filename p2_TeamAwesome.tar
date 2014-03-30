@@ -27,6 +27,12 @@ Christopher Randin      // Section 01
 Mark Martene            // Section 01
 Reza Nikoopour          // Section 01
 
+Member Contribution:
+Emily: Got working on retrieving message using message queues.
+Chris: Got working on sending messaes using message queues.
+Mark: Helped with code formatting and presenting code to be consistent.
+Reza: Helped with troubleshooting problems and understanding of IPC.
+
 Execution Instructions:
 	Be in the directory for this program. Run make.
 	sender is ./sender
@@ -40,10 +46,13 @@ Execution Instructions:
 		sudo ./recv
 	CTRL+C while the recv file is running 
 
-Extra Credit
+Extra Credit:
+N/A
 
 Resulting program transfers desginated file to "recvfile".
-p2_TeamAwesome/LICENSE0000644000175000017500000004315112313700277016625 0ustar  markapaloozamarkapaloozaGNU GENERAL PUBLIC LICENSE
+p2_TeamAwesome/LICENSE0000644000175000017500000004315112313700277016625 0ustar  markapaloozamarkapalooza
+
+		    GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
  Copyright (C) 1989, 1991 Free Software Foundation, Inc., <http://fsf.org/>
