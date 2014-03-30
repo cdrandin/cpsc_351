@@ -4,9 +4,15 @@ Language: C++
 
 Names:
 Emily Chiang		// Section 02
-Christopher Randin
-Mark Martene
-Reza Nikoopour
+Christopher Randin      // Section 01
+Mark Martene            // Section 01
+Reza Nikoopour          // Section 01
+
+Member Contribution:
+Emily: Got working on retrieving message using message queues.
+Chris: Got working on sending messaes using message queues.
+Mark: Helped with code formatting and presenting code to be consistent.
+Reza: Helped with troubleshooting problems and understanding of IPC.
 
 Execution Instructions:
 	Be in the directory for this program. Run make.
@@ -21,6 +27,8 @@ Execution Instructions:
 		sudo ./recv
 	CTRL+C while the recv file is running 
 
-Extra Credit
+Extra Credit:
+N/A
 
 Resulting program transfers desginated file to "recvfile".
+
