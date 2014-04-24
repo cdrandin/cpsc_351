@@ -1,0 +1,21 @@
+Christopher Randin
+
+CPSC 351 - Operating Systems
+
+Project 1
+
+1)
+I hope the correct values are displayed. I have a feeling the average, between each read to print rate may be off.
+
+The root directory of the program is in "proc/".
+Just type "make" to compile the program.
+The executable file is "./proc_parse"
+
+2)
+Currently, the pipe does not work. I was unable to get it to work properly and was unsure how to parse the correct commands and send them to another process.
+Jobs should work correctly, but I get a <dsyfunc> when using "ps". From reading it suggest the the parent process is still running
+when the child was terminated or interrupted. So, not sure if that is an issue or not.
+
+The root directory of the program is in "shell/".
+Just type "make" to compile the program.
+The executable file is "./shell"
