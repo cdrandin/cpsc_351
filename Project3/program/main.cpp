@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 
@@ -8,6 +9,8 @@ int main(int argc, char const *argv[])
 {	
 	int* page_sizes;
 	uint* memory_size;
+	char* file_name;
+	std::ifstream* infile;
 
 	page_sizes = new int[3];
 
@@ -46,12 +49,23 @@ int main(int argc, char const *argv[])
 		}
 	}
 
-	printf("Entered memory size was %d\n", *memory_size);
-	printf("Entered page size was %d\n", page_sizes[*page_i]);
+	file_name = new char[10];
+
+	// Get workload file
+	std::cout << "Enter the file name: ";
+	std::cin >> *file_name;
+
+	infile = new std::ifstream(file_name);
+
+	infile->close();
+
+
 
 	delete[] page_sizes;
 	delete memory_size;
 	delete page_i;
+	delete[] file_name;
+	delete infile;
 
 	return 0;
 }
