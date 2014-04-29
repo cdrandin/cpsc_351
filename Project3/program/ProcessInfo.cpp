@@ -7,11 +7,11 @@ _durationTime(0),
 _memorySize(0)
 {}
 
-ProcessInfo::ProcessInfo(const smallint& processID, 
-						 const mediumint& arrivalTime, 
-						 const mediumint& durationTime, 
-						 const mediumint& memorySize, 
-						 const smallint& _pageSize):
+ProcessInfo::ProcessInfo(const int& processID, 
+						 const int& arrivalTime, 
+						 const int& durationTime, 
+						 const int& memorySize, 
+						 const int& _pageSize):
 // initilzer list
 _processID(processID),
 _arrivalTime(arrivalTime), 
@@ -19,32 +19,32 @@ _durationTime(durationTime),
 _memorySize(memorySize)
 {}
 
-void ProcessInfo::SetProcessID(const smallint& processID)
+void ProcessInfo::SetProcessID(const int& processID)
 {
 	_processID = processID;		
 }
 
-void ProcessInfo::SetPageSize(const smallint& pageSize)
+void ProcessInfo::SetPageSize(const int& pageSize)
 {
 	_pageSize = pageSize;
 }
 
-void ProcessInfo::SetArrivalTime(const mediumint& arrivalTime)
+void ProcessInfo::SetArrivalTime(const int& arrivalTime)
 {
 	_arrivalTime = arrivalTime;		
 }
 
-void ProcessInfo::SetDurationTime(const mediumint& durationTime)
+void ProcessInfo::SetDurationTime(const int& durationTime)
 {
 	_durationTime = durationTime;		
 }
 
-void ProcessInfo::SetMemorySize(const mediumint& memorySize)
+void ProcessInfo::SetMemorySize(const int& memorySize)
 {
 	_memorySize = memorySize;		
 }
 
-smallint ProcessInfo::GetProcessID()
+int ProcessInfo::GetProcessID()
 {
 	return _processID;		
 }

@@ -9,10 +9,10 @@ inline const void MemFail();
 
 int main(int argc, char const *argv[])
 {	
-	smallint num_process      = 0;
-	mediumint memory_size     = 0;
-	const mediumint page_sizes[3] = {100, 200, 400};
-	mediumint page_size       = 0;
+	int num_process      = 0;
+	int memory_size     = 0;
+	const int page_sizes[3] = {100, 200, 400};
+	int page_size       = 0;
 
 	char* file_name           = NULL;
 	std::ifstream* infile     = NULL;
@@ -68,14 +68,13 @@ int main(int argc, char const *argv[])
 		process_info = new ProcessInfo[num_process];
 
 		// File process id
-		smallint processID     = 0;
-		mediumint arrivalTime  = 0;
-		mediumint durationTime = 0;
-		mediumint memoryAmount = 0;
-		smallint mem_count     = 0;
-		mediumint mem_cur      = 0;
+		int processID    = 0;
+		int arrivalTime  = 0;
+		int durationTime = 0;
+		int memoryAmount = 0;
+		int mem_count    = 0;
+		int mem_cur      = 0;
 
-		std::cout << num_process << std::endl;
 		for(int i = 0;i < num_process;++i)
 		{
 			*infile >> processID >> arrivalTime >> durationTime >> mem_count;
@@ -84,18 +83,18 @@ int main(int argc, char const *argv[])
 			process_info[i].SetArrivalTime(arrivalTime);
 			process_info[i].SetDurationTime(durationTime);
 
-			for(int j = 0;j<mem_count;++j)
+			for(int j = 0;j < mem_count;++j)
 			{
 				*infile >> mem_cur;
 				memoryAmount += mem_cur;
 			}
 
 			process_info[i].SetMemorySize(memoryAmount);
-
-			i = num_process; // just to run it once
-
-			std::cout << i << " " <<num_process<< " information:" << process_info[i].GetProcessID() << " " << arrivalTime << std::endl;
+			printf("ProcessID: %d  Arrivale Time: %d  Duration Time: %d  Memort Amount: %d\n", processID, arrivalTime, durationTime, memoryAmount);
+			
+			memoryAmount = 0;
 		}
+
 		infile->close();
 		delete   infile;
 	}

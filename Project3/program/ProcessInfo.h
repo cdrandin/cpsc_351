@@ -4,36 +4,32 @@
 #ifndef PROCESSINFO_H
 #define PROCESSINFO_H
 
-typedef unsigned char    smallint;  // 0 to 255
-typedef unsigned short   mediumint; // 0 to 65,535
-typedef unsigned long    largeint;  // 0 to 4,294,967,295
-
 class ProcessInfo 
 {
 	private:
-		smallint  _processID;
-		smallint  _pageSize;
+		int  _processID;
+		int  _pageSize;
 
-		mediumint _arrivalTime;
-		mediumint _durationTime;
-		mediumint _memorySize;
+		int _arrivalTime;
+		int _durationTime;
+		int _memorySize;
 		
 	public:
 		ProcessInfo();
-		ProcessInfo(const smallint& processID, 
-					const mediumint& arrivalTime, 
-					const mediumint& durationTime, 
-					const mediumint& memorySize, 
-					const smallint& _page_size);
+		ProcessInfo(const int& processID, 
+					const int& arrivalTime, 
+					const int& durationTime, 
+					const int& memorySize, 
+					const int& _page_size);
 
-		void SetProcessID(const smallint& processID);
-		void SetPageSize(const smallint& pageSize);
+		void SetProcessID(const int& processID);
+		void SetPageSize(const int& pageSize);
 		
-		void SetArrivalTime(const mediumint& arrivalTime);
-		void SetDurationTime(const mediumint& durationTime);
-		void SetMemorySize(const mediumint& memorySize);
+		void SetArrivalTime(const int& arrivalTime);
+		void SetDurationTime(const int& durationTime);
+		void SetMemorySize(const int& memorySize);
 		
-		smallint GetProcessID();
+		int GetProcessID();
 
 };
 #endif
