@@ -88,7 +88,6 @@ int main(int argc, char const *argv[])
 		infile->close();
 
 		delete   num_process;
-
 	}
 	else
 	{
