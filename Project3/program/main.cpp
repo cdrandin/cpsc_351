@@ -13,6 +13,7 @@ int main(int argc, char const *argv[])
 	uint* memory_size;
 	char* file_name;
 	std::ifstream* infile;
+	std::ofstream* outfile;
 	int* num_process;
 
 	page_sizes = new int[3];
@@ -47,7 +48,7 @@ int main(int argc, char const *argv[])
 		MemFail();
 	}
 
-	for(int i=0;i==0;)
+	for(int i=0; i==0;)
 	{
 		std::cout << "Page Size (1: 100, 2: 200, 3: 400)> ";
 		std::cin >> *page_i;
@@ -57,7 +58,7 @@ int main(int argc, char const *argv[])
 		}
 		else
 		{
-			i=1; // stop it
+			i = 1; // stop it
 		}
 	}
 
@@ -87,19 +88,34 @@ int main(int argc, char const *argv[])
 		std::cout << *num_process << std::endl;
 		infile->close();
 
-		delete   num_process;
+		//delete   num_process;
 	}
 	else
 	{
 		puts("Unable to open file");
 	}
 
+	// Write to file
+	outfile = new std::ofstream("out.txt");
+
+	if(outfile == NULL) {
+		MemFail();
+	}
+
+	if(outfile->is_open())
+	{
+		*outfile << "t=0";
+
+		outfile->close();
+	}
+
+
 	delete[] page_sizes;
 	delete   memory_size;
 	delete   page_i;
 	delete[] file_name;
 	delete   infile;
-
+	delete	 outfile;
 	return 0;
 }
 
