@@ -13,10 +13,10 @@ const void PrintMemoryMap(const int memory_size, const int page_size, std::ofstr
 
 int main(int argc, char const *argv[])
 {	
-	int num_process      = 0;
-	int memory_size     = 0;
+	int num_process           = 0;
+	int memory_size           = 0;
 	const int page_sizes[3] = {100, 200, 400};
-	int page_size       = 0;
+	int page_size             = 0;
 
 	char* file_name           = NULL;
 	std::ifstream* infile     = NULL;
@@ -45,7 +45,6 @@ int main(int argc, char const *argv[])
 
 	// Assigned the appropriate page size
 	page_size = page_sizes[page_i-1];
-	//std::cout << page_size;
 
 	file_name = new char[10];
 	if(file_name == NULL)
