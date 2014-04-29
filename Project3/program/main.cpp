@@ -75,7 +75,8 @@ int main(int argc, char const *argv[])
 		smallint mem_count     = 0;
 		mediumint mem_cur      = 0;
 
-		for(smallint i = 0;i < num_process;++i)
+		std::cout << num_process << std::endl;
+		for(int i = 0;i < num_process;++i)
 		{
 			*infile >> processID >> arrivalTime >> durationTime >> mem_count;
 
@@ -83,7 +84,7 @@ int main(int argc, char const *argv[])
 			process_info[i].SetArrivalTime(arrivalTime);
 			process_info[i].SetDurationTime(durationTime);
 
-			for(smallint j = 0;j<mem_count;++j)
+			for(int j = 0;j<mem_count;++j)
 			{
 				*infile >> mem_cur;
 				memoryAmount += mem_cur;
@@ -92,6 +93,8 @@ int main(int argc, char const *argv[])
 			process_info[i].SetMemorySize(memoryAmount);
 
 			i = num_process; // just to run it once
+
+			std::cout << i << " " <<num_process<< " information:" << process_info[i].GetProcessID() << " " << arrivalTime << std::endl;
 		}
 		infile->close();
 		delete   infile;

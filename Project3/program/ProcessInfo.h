@@ -32,5 +32,8 @@ class ProcessInfo
 		void SetArrivalTime(const mediumint& arrivalTime);
 		void SetDurationTime(const mediumint& durationTime);
 		void SetMemorySize(const mediumint& memorySize);
+		
+		smallint GetProcessID();
+
 };
 #endif

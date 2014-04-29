@@ -43,3 +43,8 @@ void ProcessInfo::SetMemorySize(const mediumint& memorySize)
 {
 	_memorySize = memorySize;		
 }
+
+smallint ProcessInfo::GetProcessID()
+{
+	return _processID;		
+}
