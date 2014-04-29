@@ -13,13 +13,15 @@ class ProcessInfo
 		int _arrivalTime;
 		int _durationTime;
 		int _memorySize;
+		int _departureTime;
 		
 	public:
 		ProcessInfo();
 		ProcessInfo(const int& processID, 
 					const int& arrivalTime, 
 					const int& durationTime, 
-					const int& memorySize, 
+					const int& memorySize,
+					const int& _departureTime, 
 					const int& _page_size);
 
 		void SetProcessID(const int& processID);
@@ -28,8 +30,13 @@ class ProcessInfo
 		void SetArrivalTime(const int& arrivalTime);
 		void SetDurationTime(const int& durationTime);
 		void SetMemorySize(const int& memorySize);
+
+		void SetDepartureTime(const int& departureTime);
 		
-		int GetProcessID();
+		const int GetProcessID() const;
+		const int GetArrivalTime() const;
+		const int GetDurationTime() const;
+		const int GetDepartureTime() const;
 
 };
 #endif
