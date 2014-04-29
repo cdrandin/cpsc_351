@@ -4,9 +4,9 @@
 #ifndef PROCESSINFO_H
 #define PROCESSINFO_H
 
-typedef unsigned char    smallint; // 0 to 255
+typedef unsigned char    smallint;  // 0 to 255
 typedef unsigned short   mediumint; // 0 to 65,535
-typedef unsigned long    largeint; // 0 to 4,294,967,295
+typedef unsigned long    largeint;  // 0 to 4,294,967,295
 
 class ProcessInfo 
 {

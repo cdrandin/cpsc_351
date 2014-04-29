@@ -67,6 +67,32 @@ int main(int argc, char const *argv[])
 		// Create classes for the number of process information we need
 		process_info = new ProcessInfo[num_process];
 
+		// File process id
+		smallint processID     = 0;
+		mediumint arrivalTime  = 0;
+		mediumint durationTime = 0;
+		mediumint memoryAmount = 0;
+		smallint mem_count     = 0;
+		mediumint mem_cur      = 0;
+
+		for(smallint i = 0;i < num_process;++i)
+		{
+			*infile >> processID >> arrivalTime >> durationTime >> mem_count;
+
+			process_info[i].SetProcessID(processID);
+			process_info[i].SetArrivalTime(arrivalTime);
+			process_info[i].SetDurationTime(durationTime);
+
+			for(smallint j = 0;j<mem_count;++j)
+			{
+				*infile >> mem_cur;
+				memoryAmount += mem_cur;
+			}
+
+			process_info[i].SetMemorySize(memoryAmount);
+
+			i = num_process; // just to run it once
+		}
 		infile->close();
 		delete   infile;
 	}
@@ -96,7 +122,6 @@ int main(int argc, char const *argv[])
 	
 	if(process_info != NULL)
 	{	
-		puts("here");
 		delete[] process_info;
 	}
 
