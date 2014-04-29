@@ -12,10 +12,11 @@ class ProcessInfo
 {
 	private:
 		smallint  _processID;
+		smallint  _pageSize;
+
 		mediumint _arrivalTime;
 		mediumint _durationTime;
 		mediumint _memorySize;
-		smallint  _page_size;
 		
 	public:
 		ProcessInfo();
@@ -24,5 +25,12 @@ class ProcessInfo
 					const mediumint& durationTime, 
 					const mediumint& memorySize, 
 					const smallint& _page_size);
+
+		void SetProcessID(const smallint& processID);
+		void SetPageSize(const smallint& pageSize);
+		
+		void SetArrivalTime(const mediumint& arrivalTime);
+		void SetDurationTime(const mediumint& durationTime);
+		void SetMemorySize(const mediumint& memorySize);
 };
 #endif
