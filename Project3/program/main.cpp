@@ -110,8 +110,6 @@ int main(int argc, char const *argv[])
 			}
 
 			process_info[i].SetMemorySize(memoryAmount);
-			printf("ProcessID: %d  Arrivale Time: %d  Duration Time: %d  Memort Amount: %d\n", processID, arrivalTime, durationTime, memoryAmount);
-			
 			memoryAmount = 0;
 		}
 
@@ -151,7 +149,6 @@ int main(int argc, char const *argv[])
 
 			for(int j = 0; j < num_process; ++j)
 			{
-
 				// find proceesses with arrival time == virtualClock
 				if(process_info[j].GetArrivalTime() == (int)virtualClock)
 				{
@@ -312,27 +309,25 @@ const void PrintMemoryMap(const int& memory_size, const int& page_size, const in
 		// resets page number for each process
 		currentPage += 1;
 		currentProcessID = memory_block[i];
+
 		if (oldProcessID != currentProcessID)
 			currentPage =1;
+
 		oldProcessID = currentProcessID;
 
 		start_mem = i*page_size;
 		end_mem   = (i+1)*page_size-1;
-
-		int next = 0;
-		for(int j = 0; j < mapInc; ++j)
-		{
-			
-		}
 		
 		outfile << start_mem << "-" << end_mem << ": ";
+
 		if(currentProcessID == -1)
 		{
 			outfile << "Free Frame(s)\n";
 		}
-		
 		else
-			 outfile << "Process " << currentProcessID<< ", Page " << currentPage << std::endl;
+		{
+			outfile << "Process " << currentProcessID<< ", Page " << currentPage << std::endl;
+		}
 	}
 }
 
