@@ -137,13 +137,16 @@ int main(int argc, char const *argv[])
 	// write to file
 	if(outfile.is_open())
 	{
+		std::cout << "CHECK: " << process_info[0].GetArrivalTime() << std::endl;	
+
 		memory_block = new int[memory_size/page_size];
 		// Our way of saying it is free space
-		for(int i = 0; i < memory_size; ++i)
+		for(int i = 0; i < memory_size/page_size; ++i)
 		{
 			memory_block[i] = -1;
 		}
 
+		std::cout << "CHECK1: " << process_info[0].GetArrivalTime() << std::endl;	
 		// clock loop
 		for(int i=0; i==0;) // for(process)
 		{
@@ -151,41 +154,14 @@ int main(int argc, char const *argv[])
 
 			for(int j = 0; j < num_process; ++j)
 			{
-
-				std::cout << process_info[j].GetDepartureTime() << " " << virtualClock << std::endl;
-				// find process with departure time == virtualClock
-				if(process_info[j].GetDepartureTime() == (int)virtualClock)
-				{
-					std::cout << "got in\n";
-					if(!once)
-					{
-						outfile << "t = " << virtualClock << ":  Process " << process_info[j].GetProcessID() << " completes\n";
-						once = true;
-					}
-					
-					// remove process from memory
-					// =====NEED SHIT HEREEEE
-					for(int j = 0; j < memory_size/page_size; ++j)
-					{
-						if(memory_block[j] == process_info[i].GetProcessID())
-						{
-							memory_block[j] = -1;
-						}
-					}
-
-					// another process is done, update counter
-					++process_met;
-
-					// Print out memory map
-					PrintMemoryMap(memory_size, page_size, num_process, process_info, outfile, memory_block);
-				}
+				//std::cout << "arrivaltime: " << num_process << " " <<process_info[j].GetArrivalTime() << " " << virtualClock << std::endl;
 
 				// find proceesses with arrival time == virtualClock
 				if(process_info[j].GetArrivalTime() == (int)virtualClock)
 				{
 					if(!once)
 					{
-						outfile << "t = " << virtualClock << ":  Process " << process_info[j].GetProcessID() << " arrives\n";
+						outfile << "\nt = " << virtualClock << ":  Process " << process_info[j].GetProcessID() << " arrives\n";
 						once = true;
 					}
 
@@ -194,19 +170,22 @@ int main(int argc, char const *argv[])
 					PrintInputQueue(inputQueue, outfile);
 				}
 			}
+		
+			//std::cout << "out of for loop" << std::endl;
 
 			// Put the first process in queue onto memory
 			while (!inputQueue.empty())
 			{
 				currentProcessID = inputQueue.front();
-				if(NumberOfFreeFrames(memory_block, memory_size/page_size) + page_size > process_info[currentProcessID-1].GetMemorySize())
+				//std::cout << "free frames: " << NumberOfFreeFrames(memory_block, memory_size/page_size) * page_size << std::endl;
+				if(NumberOfFreeFrames(memory_block, memory_size/page_size) * page_size >= process_info[currentProcessID-1].GetMemorySize())
 				{
 					// get and pop first process on queue
 					inputQueue.pop();
-					std::cout << "process ID" << currentProcessID << std::endl;
+					//std::cout << "process ID" << currentProcessID << std::endl;
 
 					// Prints MM moves and queue messages
-					outfile << "\t\tMM moves Process " << currentProcessID << " to memory\n";
+					outfile << "       MM moves Process " << currentProcessID << " to memory\n";
 					PrintInputQueue(inputQueue, outfile);
 
 					// move process into memory
@@ -216,19 +195,21 @@ int main(int argc, char const *argv[])
 					int numOfPagesNeeded = (int)ceil((double)process_info[currentProcessID-1].GetMemorySize()/(double)page_size);
 					int count = 0;
 
+					std::cout << "num pages " << numOfPagesNeeded << std::endl;
+
 					// FIll up the memory block with the valid processes
-					for(int j = 0; j < numOfPagesNeeded; ++j)
+					for(int j = 0; j < memory_size/page_size; ++j)
 					{
-						if(memory_block[j] == -1 && count > numOfPagesNeeded)
+						if(memory_block[j] == -1 && count < numOfPagesNeeded)
 						{
-							memory_block[j] = process_info[i].GetProcessID();
+							memory_block[j] = process_info[currentProcessID-1].GetProcessID();
 							++count;
 						}
 					}
 
 					// update process departure time
 					process_info[currentProcessID-1].SetDepartureTime(process_info[currentProcessID-1].GetDurationTime() + virtualClock);
-					std::cout << "Departure Time" << process_info[currentProcessID-1].GetDepartureTime() << std::endl;
+					//std::cout << "Departure Time" << process_info[currentProcessID-1].GetDepartureTime() << std::endl;
 
 					//UpdateMemoryMap(memory_size, page_size, memory_block, process_info, process_info[i].GetProcessID(), num_process, virtualClock);
 
@@ -241,9 +222,46 @@ int main(int argc, char const *argv[])
 					}
 			}
 
+
+			for(int j = 0; j < num_process; ++j)
+			{
+
+				//std::cout << "Times: " << num_process << " " <<process_info[j].GetDepartureTime() << " " << virtualClock << std::endl;
+				// find process with departure time == virtualClock
+				if(process_info[j].GetDepartureTime() == (int)virtualClock)
+				{
+					std::cout << "got in\n";
+					if(!once)
+					{
+						outfile << "\nt = " << virtualClock << ":  ";
+						once = true;
+					}
+					else{
+						outfile << "       ";
+					}
+					outfile << "Process " << process_info[j].GetProcessID() << " completes\n";
+			
+					// remove process from memory
+					// =====NEED SHIT HEREEEE
+					for(int k = 0; k < memory_size/page_size; ++k)
+					{
+						if(memory_block[k] == process_info[j].GetProcessID())
+						{
+							memory_block[k] = -1;
+						}
+					}
+
+					// another process is done, update counter
+					++process_met;
+
+					// Print out memory map
+					PrintMemoryMap(memory_size, page_size, num_process, process_info, outfile, memory_block);
+				}
+			}
+
 			// Time increases
 			virtualClock += 100;
-			std::cout << process_met << std::endl;
+			//std::cout << "MET: " << process_met << std::endl;
 			if(process_met == num_process)
 				i=1;
 		}
@@ -274,7 +292,7 @@ inline const void MemFail()
 
 const void PrintInputQueue(std::queue<int> inputQueue, std::ofstream& outfile)
 {
-	outfile << "\t\tInput Queue: [";
+	outfile << "       Input Queue: [";
 	if(!inputQueue.empty())
 	{
 		for(int i=0;i<=(int)inputQueue.size();++i)
@@ -294,26 +312,44 @@ const void PrintMemoryMap(const int& memory_size, const int& page_size, const in
 	int mapInc           = memory_size/page_size;
 	int currentProcessID = 0, 
 		currentPage      = 0;
+	int oldProcessID	 = 0;
 	int start_mem        = 0, 
 		end_mem          = 0;
 
-	outfile << "\t\tMemory Map: ";
+	outfile << "       Memory Map: ";
 
 	// loop for each page of memory map
 	for(int i = 0; i < mapInc; ++i)
 	{
 		if(i > 0)
 		{
-			outfile << "\t\t\t\t\t";
+			outfile << "                  ";
 		}
+
+		// resets page number for each process
+		currentPage += 1;
+		currentProcessID = memory_block[i];
+		if (oldProcessID != currentProcessID)
+			currentPage =1;
+		oldProcessID = currentProcessID;
 
 		start_mem = i*page_size;
 		end_mem   = (i+1)*page_size-1;
 
-		currentPage = i + 1;
-		currentProcessID = memory_block[i];
-
-		outfile << start_mem << "-" << end_mem << ": Process " << currentProcessID<< ", Page " << currentPage << std::endl;
+		int next = 0;
+		for(int j = 0; j < mapInc; ++j)
+		{
+			
+		}
+		
+		outfile << start_mem << "-" << end_mem << ": ";
+		if(currentProcessID == -1)
+		{
+			outfile << "Free Frame(s)\n";
+		}
+		
+		else
+			 outfile << "Process " << currentProcessID<< ", Page " << currentPage << std::endl;
 	}
 }
 
