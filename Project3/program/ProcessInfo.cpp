@@ -69,3 +69,8 @@ const int ProcessInfo::GetDepartureTime() const
 {
 	return _departureTime;		
 }
+
+const int ProcessInfo::GetMemorySize() const
+{
+	return _memorySize;
+}

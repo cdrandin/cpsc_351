@@ -37,6 +37,7 @@ class ProcessInfo
 		const int GetArrivalTime() const;
 		const int GetDurationTime() const;
 		const int GetDepartureTime() const;
+		const int GetMemorySize() const;
 
 };
 #endif
