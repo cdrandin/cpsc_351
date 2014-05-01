@@ -295,39 +295,59 @@ const void PrintMemoryMap(const int& memory_size, const int& page_size, const in
 	int oldProcessID	 = 0;
 	int start_mem        = 0, 
 		end_mem          = 0;
+	int inFreeFrame	 	 = -1; // -1: not in frame, 0: last frame, 1: first frame
 
 	outfile << "       Memory Map: ";
 
 	// loop for each page of memory map
 	for(int i = 0; i < mapInc; ++i)
 	{
-		if(i > 0)
+		if(i > 0 && inFreeFrame < 0)
 		{
 			outfile << "                  ";
 		}
 
-		// resets page number for each process
+		// checks which process we are on compare to old process
 		currentPage += 1;
 		currentProcessID = memory_block[i];
 
 		if (oldProcessID != currentProcessID)
 			currentPage =1;
 
-		oldProcessID = currentProcessID;
-
-		start_mem = i*page_size;
-		end_mem   = (i+1)*page_size-1;
+		// check where in free frame we are
+		// Notice: it can be first free frame and the last; therefore different if statements
 		
-		outfile << start_mem << "-" << end_mem << ": ";
+		// First free frame: current is free, past is not free
+		if (currentProcessID == -1 && oldProcessID >= 0) 
+		{
+			inFreeFrame = 1;
+			start_mem = i*page_size;
+		}
+		
+		// Last free frame: is in free frame and at the end of memory or the next frame not free
+		if (inFreeFrame > 0 && (memory_block[i+1] > -1 || i == mapInc-1))
+		{
+			inFreeFrame = 0;
+			end_mem = (i+1)*page_size-1;
+			outfile << start_mem << "-" << end_mem << ": Free Frame(s)" << std::endl;
+		}
 
-		if(currentProcessID == -1)
+		// not in free frame
+		if (inFreeFrame == -1)
 		{
-			outfile << "Free Frame(s)\n";
+			//inFreeFrame = -1;
+			start_mem = i*page_size;
+			end_mem   = (i+1)*page_size-1;
+			outfile << start_mem << "-" << end_mem << ": Process " << currentProcessID<< ", Page " << currentPage << std::endl;
 		}
-		else
-		{
-			outfile << "Process " << currentProcessID<< ", Page " << currentPage << std::endl;
-		}
+
+		// resets old process to current for next loop
+		oldProcessID = currentProcessID;
+		// if the last frame has been printed, set free frame to -1 for next loop
+		if (inFreeFrame == 0)
+			inFreeFrame = -1;
+		
+
 	}
 }
 
