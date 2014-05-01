@@ -12,13 +12,15 @@ ProcessInfo::ProcessInfo(const int& processID,
 						 const int& durationTime, 
 						 const int& memorySize, 
 						 const int& departureTime,
+						 const int& startTime,
 						 const int& _pageSize):
 // initilzer list
 _processID(processID),
 _arrivalTime(arrivalTime), 
 _durationTime(durationTime), 
 _memorySize(memorySize),
-_departureTime(departureTime)
+_departureTime(departureTime),
+_startTime(startTime)
 {}
 
 void ProcessInfo::SetProcessID(const int& processID)
@@ -49,6 +51,11 @@ void ProcessInfo::SetDepartureTime(const int& departureTime)
 {
 	_departureTime = departureTime;		
 }
+void ProcessInfo::SetStartTime(const int& startTime)
+{
+	_startTime = startTime;		
+}
+
 
 const int ProcessInfo::GetProcessID() const
 {
@@ -73,4 +80,9 @@ const int ProcessInfo::GetDepartureTime() const
 const int ProcessInfo::GetMemorySize() const
 {
 	return _memorySize;
+}
+
+const int ProcessInfo::GetStartTime() const
+{
+	return _startTime;
 }

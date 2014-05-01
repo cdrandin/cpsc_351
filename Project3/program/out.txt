@@ -248,3 +248,5 @@ t = 2100:  Process 8 completes
 
 t = 3000:  Process 6 completes
        Memory Map: 0-1999: Free Frame(s)
+
+Average Turnaround Time: 1175.00

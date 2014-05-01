@@ -5,6 +5,7 @@
 #include <queue>
 #include <vector>
 #include <cmath>
+#include <iomanip>
 
 #include "ProcessInfo.h"
 
@@ -178,9 +179,7 @@ int main(int argc, char const *argv[])
 					PrintInputQueue(inputQueue, outfile);
 
 					// move process into memory
-					// =====NEED SHIT HEREEEE
 					// Checking if the process can fit in the memory block
-					
 					int numOfPagesNeeded = (int)ceil((double)process_info[currentProcessID-1].GetMemorySize()/(double)page_size);
 					int count = 0;
 
@@ -194,7 +193,8 @@ int main(int argc, char const *argv[])
 						}
 					}
 
-					// update process departure time
+					// update process departure time and arrival time
+					process_info[currentProcessID-1].SetStartTime(virtualClock);
 					process_info[currentProcessID-1].SetDepartureTime(process_info[currentProcessID-1].GetDurationTime() + virtualClock);
 
 					// Prints Memory map
@@ -223,7 +223,6 @@ int main(int argc, char const *argv[])
 					outfile << "Process " << process_info[j].GetProcessID() << " completes\n";
 			
 					// remove process from memory
-					// =====NEED SHIT HEREEEE
 					for(int k = 0; k < memory_size/page_size; ++k)
 					{
 						if(memory_block[k] == process_info[j].GetProcessID())
@@ -246,6 +245,16 @@ int main(int argc, char const *argv[])
 				i=1;
 		}
 
+		// turnaround time
+		float totalTurnaround = 0;
+		for(int j = 0; j < num_process; ++j)
+		{
+			totalTurnaround += (process_info[j].GetDepartureTime() - process_info[j].GetArrivalTime());
+		}
+		totalTurnaround /= (float)num_process;
+
+		outfile << "\nAverage Turnaround Time: " << std::fixed << std::setprecision(2) << totalTurnaround << std::endl;
+		std::cout << "Average Turnaround Time: " << std::fixed << std::setprecision(2) << totalTurnaround << std::endl;
 		outfile.close();
 	}
 
